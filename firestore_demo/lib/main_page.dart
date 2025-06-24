@@ -1,15 +1,28 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firestore_demo/bloc/user_bloc.dart';
+import 'package:firestore_demo/models/user.dart';
 import 'package:firestore_demo/widget/card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
+  MainPage({super.key});
+
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<UserBloc>().add(FetchUserEvent());
+  }
+
   TextEditingController nameController = TextEditingController();
   TextEditingController ageController = TextEditingController();
-  final CollectionReference users = FirebaseFirestore.instance.collection(
-    "users",
-  );
-
-  MainPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,64 +36,24 @@ class MainPage extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // ListView(
-          //   children: [
-          //     FutureBuilder<QuerySnapshot>(
-          //       future: users.get(),
-          //       builder: (context, snapshot) {
-          //         if (snapshot.connectionState == ConnectionState.waiting) {
-          //           return CircularProgressIndicator();
-          //         } else if (!snapshot.hasData) {
-          //           return Text("Data Not Found");
-          //         } else {
-          //           return Column(
-          //             children: snapshot.data!.docs.map((e) {
-          //               final data = e.data() as Map<String, dynamic>;
-          //               return CardWidget(name: data["name"], age: data["age"]);
-          //             }).toList(),
-          //           );
-          //         }
-          //       },
-          //     ),
-          //   ],
-          // ),
-          // FutureBuilder<QuerySnapshot>(
-          //   future: users.get(),
-          //   builder: (_, snapshot) {
-          //     if (snapshot.connectionState == ConnectionState.waiting) {
-          //       return Center(child: const CircularProgressIndicator());
-          //     } else if (!snapshot.hasData) {
-          //       return Center(child: Text("Data Not Found"));
-          //     } else {
-          //       return ListView.builder(
-          //         itemCount: snapshot.data!.docs.length,
-          //         itemBuilder: (context, index) {
-          //           final doc = snapshot.data!.docs[index];
-          //           final Map<String, dynamic> data =
-          //               doc.data() as Map<String, dynamic>;
-          //           return CardWidget(name: data["name"], age: data["age"]);
-          //         },
-          //       );
-          //     }
-          //   },
-          // ),
-          StreamBuilder<QuerySnapshot>(
-            stream: users.snapshots(),
-            builder: (_, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
+          BlocBuilder<UserBloc, UserState>(
+            builder: (context, state) {
+              if (state is UserLoading) {
+                log(state.toString());
                 return Center(child: const CircularProgressIndicator());
-              } else if (!snapshot.hasData) {
-                return Center(child: Text("Data Not Found"));
-              } else {
+              } else if (state is UserValue) {
+                log(state.toString());
                 return ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
+                  itemCount: state.users.length,
                   itemBuilder: (context, index) {
-                    final doc = snapshot.data!.docs[index];
-                    final Map<String, dynamic> data =
-                        doc.data() as Map<String, dynamic>;
-                    return CardWidget(name: data["name"], age: data["age"]);
+                    final User user = state.users[index];
+                    return CardWidget(name: user.name, age: user.age);
                   },
                 );
+              } else if (state is UserError) {
+                return Center(child: Text(state.message));
+              } else {
+                return SizedBox.shrink();
               }
             },
           ),
@@ -126,10 +99,13 @@ class MainPage extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(15, 15, 0, 15),
                       child: ElevatedButton(
                         onPressed: () {
-                          users.add({
-                            "name": nameController.text,
-                            "age": int.tryParse(ageController.text) ?? 0,
-                          });
+                          context.read<UserBloc>().add(
+                            AddUserEvent(
+                              name: nameController.text,
+                              age: int.parse(ageController.text),
+                            ),
+                          );
+                          context.read<UserBloc>().add(FetchUserEvent());
                           nameController.text = "";
                           ageController.text = "";
                         },

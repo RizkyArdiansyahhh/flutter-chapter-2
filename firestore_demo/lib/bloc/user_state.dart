@@ -9,11 +9,20 @@ sealed class UserState extends Equatable {
 
 final class UserInitial extends UserState {}
 
-final class UserValue extends UserState {
-  final String name;
-  final int age;
-  const UserValue({required this.name, required this.age});
+final class UserLoading extends UserState {}
+
+final class UserError extends UserState {
+  final String message;
+  const UserError({required this.message});
 
   @override
-  List<Object> get props => [name, age];
+  List<Object> get props => [message];
+}
+
+final class UserValue extends UserState {
+  final List<User> users;
+  const UserValue(this.users);
+
+  @override
+  List<Object> get props => [users];
 }

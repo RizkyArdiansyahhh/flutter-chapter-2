@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firestore_demo/bloc/user_bloc.dart';
 import 'package:firestore_demo/main_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +15,9 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: MainPage());
+    return BlocProvider(
+      create: (context) => UserBloc(),
+      child: MaterialApp(home: MainPage()),
+    );
   }
 }
