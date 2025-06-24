@@ -43,12 +43,30 @@ class _MainPageState extends State<MainPage> {
                 return Center(child: const CircularProgressIndicator());
               } else if (state is UserValue) {
                 log(state.toString());
-                return ListView.builder(
-                  itemCount: state.users.length,
-                  itemBuilder: (context, index) {
-                    final User user = state.users[index];
-                    return CardWidget(name: user.name, age: user.age);
-                  },
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.builder(
+                    itemCount: state.users.length,
+                    itemBuilder: (context, index) {
+                      final User user = state.users[index];
+                      return CardWidget(
+                        name: user.name,
+                        age: user.age,
+                        onDelete: () {
+                          context.read<UserBloc>().add(
+                            DeleteUserEvent(id: user.id!),
+                          );
+                          context.read<UserBloc>().add(FetchUserEvent());
+                        },
+                        onEdit: () {
+                          context.read<UserBloc>().add(
+                            EditUserEvent(id: user.id!),
+                          );
+                          context.read<UserBloc>().add(FetchUserEvent());
+                        },
+                      );
+                    },
+                  ),
                 );
               } else if (state is UserError) {
                 return Center(child: Text(state.message));

@@ -17,6 +17,22 @@ class AddUserEvent extends UserEvent {
   List<Object> get props => [name, age];
 }
 
-class DeleteUserEvent extends UserEvent {}
+class DeleteUserEvent extends UserEvent {
+  final String id;
+
+  const DeleteUserEvent({required this.id});
+
+  @override
+  List<Object> get props => [id];
+}
 
 class FetchUserEvent extends UserEvent {}
+
+class EditUserEvent extends UserEvent {
+  final String id;
+
+  const EditUserEvent({required this.id});
+
+  @override
+  List<Object> get props => [id];
+}

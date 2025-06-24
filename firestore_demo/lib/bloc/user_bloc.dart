@@ -27,12 +27,35 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         final snapshot = await users.get();
         List<User> dataUser = snapshot.docs.map((e) {
           final data = e.data() as Map<String, dynamic>;
-          return User.fromJson(data);
+          return User.fromJson(e.id, data);
         }).toList();
         emit(UserValue(dataUser));
       } catch (e) {
         emit(UserError(message: "failde to Fetch Users"));
       }
     });
+    on<DeleteUserEvent>((event, emit) async {
+      try {
+        await users.doc(event.id).delete();
+      } catch (e) {
+        emit(UserError(message: "Filed to Delete Id ${event.id}"));
+      }
+    });
+    on<EditUserEvent>((event, emit) async {
+      try {
+        final docSnapshot = await users.doc(event.id).get();
+        final data = docSnapshot.data() as Map<String, dynamic>;
+        await users.doc(event.id).update({"age": data["age"] + 1});
+      } catch (e) {
+        emit(UserError(message: "Failed To Edit Id ${event.id}"));
+      }
+    });
+  }
+
+  @override
+  void onChange(Change<UserState> change) {
+    // TODO: implement onChange
+    super.onChange(change);
+    print(change);
   }
 }

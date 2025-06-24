@@ -26,3 +26,5 @@ final class UserValue extends UserState {
   @override
   List<Object> get props => [users];
 }
+
+final class UserEdit extends UserState {}
