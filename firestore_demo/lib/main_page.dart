@@ -23,26 +23,66 @@ class MainPage extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          ListView(
-            children: [
-              FutureBuilder<QuerySnapshot>(
-                future: users.get(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (!snapshot.hasData) {
-                    return Text("Data Not Found");
-                  } else {
-                    return Column(
-                      children: snapshot.data!.docs.map((e) {
-                        final data = e.data() as Map<String, dynamic>;
-                        return CardWidget(name: data["name"], age: data["age"]);
-                      }).toList(),
-                    );
-                  }
-                },
-              ),
-            ],
+          // ListView(
+          //   children: [
+          //     FutureBuilder<QuerySnapshot>(
+          //       future: users.get(),
+          //       builder: (context, snapshot) {
+          //         if (snapshot.connectionState == ConnectionState.waiting) {
+          //           return CircularProgressIndicator();
+          //         } else if (!snapshot.hasData) {
+          //           return Text("Data Not Found");
+          //         } else {
+          //           return Column(
+          //             children: snapshot.data!.docs.map((e) {
+          //               final data = e.data() as Map<String, dynamic>;
+          //               return CardWidget(name: data["name"], age: data["age"]);
+          //             }).toList(),
+          //           );
+          //         }
+          //       },
+          //     ),
+          //   ],
+          // ),
+          // FutureBuilder<QuerySnapshot>(
+          //   future: users.get(),
+          //   builder: (_, snapshot) {
+          //     if (snapshot.connectionState == ConnectionState.waiting) {
+          //       return Center(child: const CircularProgressIndicator());
+          //     } else if (!snapshot.hasData) {
+          //       return Center(child: Text("Data Not Found"));
+          //     } else {
+          //       return ListView.builder(
+          //         itemCount: snapshot.data!.docs.length,
+          //         itemBuilder: (context, index) {
+          //           final doc = snapshot.data!.docs[index];
+          //           final Map<String, dynamic> data =
+          //               doc.data() as Map<String, dynamic>;
+          //           return CardWidget(name: data["name"], age: data["age"]);
+          //         },
+          //       );
+          //     }
+          //   },
+          // ),
+          StreamBuilder<QuerySnapshot>(
+            stream: users.snapshots(),
+            builder: (_, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: const CircularProgressIndicator());
+              } else if (!snapshot.hasData) {
+                return Center(child: Text("Data Not Found"));
+              } else {
+                return ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    final doc = snapshot.data!.docs[index];
+                    final Map<String, dynamic> data =
+                        doc.data() as Map<String, dynamic>;
+                    return CardWidget(name: data["name"], age: data["age"]);
+                  },
+                );
+              }
+            },
           ),
           Align(
             alignment: Alignment.bottomCenter,
