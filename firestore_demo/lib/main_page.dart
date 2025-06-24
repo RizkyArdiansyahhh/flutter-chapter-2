@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firestore_demo/widget/card.dart';
 import 'package:flutter/material.dart';
 
 class MainPage extends StatelessWidget {
@@ -24,50 +25,22 @@ class MainPage extends StatelessWidget {
         children: [
           ListView(
             children: [
-              // FutureBuilder <QuerySnapshot>(
-              //   future: users.get(),
-              //   builder: (context,snapshot){
-              //     if(snapshot.connectionState == ConnectionState.waiting){
-              //       return CircularProgressIndicator();
-              //     }else if(!snapshot.hasData){
-              //       return Text("Data Not Found");
-              //     }else{
-              //       return
-              //     }
-              //   }
-              //   )
-              Column(
-                children: [
-                  Container(
-                    margin: EdgeInsets.symmetric(vertical: 7),
-                    width: MediaQuery.of(context).size.width * .95,
-                    height: 80,
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.black, width: 1.0),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Nama",
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Text(
-                          "Nama",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              FutureBuilder<QuerySnapshot>(
+                future: users.get(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (!snapshot.hasData) {
+                    return Text("Data Not Found");
+                  } else {
+                    return Column(
+                      children: snapshot.data!.docs.map((e) {
+                        final data = e.data() as Map<String, dynamic>;
+                        return CardWidget(name: data["name"], age: data["age"]);
+                      }).toList(),
+                    );
+                  }
+                },
               ),
             ],
           ),
